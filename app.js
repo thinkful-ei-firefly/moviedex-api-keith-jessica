@@ -25,8 +25,24 @@ app.use(validateBearerToken);
 
 
 app.get('/movie', (req, res) => {
+  let {genre, country, avg_vote} = req.query;
+  
+  let returndata = movieData;
+  
+  if (avg_vote) {
+    avg_vote = Number(avg_vote);
+    if (!avg_vote || avg_vote > 10 || avg_vote < 0) {
+      return res
+        .status(400)
+        .send('avg_vote must be a valid number between 0 and 10');
+    }    
+    returndata = returndata.filter(movie => movie.avg_vote >= Number(avg_vote));
+  }
 
-  return res.json(movieData);
+
+
+
+  return res.json(returndata);
 });
 
 const PORT = 8000;
