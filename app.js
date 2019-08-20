@@ -8,12 +8,15 @@ const helmet = require('helmet');
 
 const movieData = require('./movieData');
 
-//console.log(process.env.API_KEY); => 'secret-key'
-
 const app = express();
 
 function validateBearerToken(req, res, next) {
-  console.log('checking bearer token...');
+  const key = req.get('Authorization').split(' ')[1];
+  if (!(key === process.env.API_KEY)){
+    return res
+      .status(401)
+      .send('You do not have authorizaion');
+  }
   next();
 }
 
@@ -39,9 +42,19 @@ app.get('/movie', (req, res) => {
     returndata = returndata.filter(movie => movie.avg_vote >= Number(avg_vote));
   }
 
+  if (country) {
+    returndata = returndata.filter(data => data.country.toLowerCase().includes(country.toLowerCase()));
+  }
+  if (genre) {
+    returndata = returndata.filter(data => data.genre.toLowerCase().includes(genre.toLowerCase()));
+  }
 
 
 
+  if (returndata.length === 0) {
+      return res
+        .json('No results found');
+  }
   return res.json(returndata);
 });
 
